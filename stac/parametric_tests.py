@@ -8,6 +8,7 @@
 """
 
 import itertools as it
+import numpy as np
 import scipy as sp
 import scipy.stats as st
 
@@ -40,12 +41,12 @@ def anova_test(*args):
     if len(set([len(v) for v in args])) != 1: raise ValueError('Unequal number of samples')
 
     # Precalcs
-    x_j = [sp.sum(group) for group in args]
-    x_t = sp.sum(x_j)
+    x_j = [np.sum(group) for group in args]
+    x_t = np.sum(x_j)
 
     # Variances
-    ss_t = sp.sum([v**2 for v in group for group in args]) - x_t**2/float(k*n)
-    ss_bg = sp.sum(x_j[j]**2/float(n) for j in range(k)) - x_t**2/float(k*n)
+    ss_t = np.sum([v**2 for group in args for v in group]) - x_t**2/float(k*n)
+    ss_bg = np.sum(np.fromiter((x_j[j]**2/float(n) for j in range(k)), dtype=float)) - x_t**2/float(k*n)
     ss_wg = ss_t - ss_bg
 
     # Degrees of freedom
@@ -56,7 +57,7 @@ def anova_test(*args):
     p_value = 1 - st.f.cdf(F, df_bg, df_wg)
     
     # Pivots
-    pivots = [sp.mean(group)/sp.sqrt(2*(ss_wg/df_wg)/float(n)) for group in args]
+    pivots = [np.mean(group)/np.sqrt(2*(ss_wg/df_wg)/float(n)) for group in args]
 
     return F, p_value, pivots
     
@@ -89,14 +90,14 @@ def anova_within_test(*args):
     if len(set([len(v) for v in args])) != 1: raise ValueError('Unequal number of samples')
 
     # Precalcs
-    x_j = [sp.sum(group) for group in args]
-    x_t = sp.sum(x_j)
-    s_i = [sp.sum([group[i] for group in args]) for i in range(n)]
+    x_j = [np.sum(group) for group in args]
+    x_t = np.sum(x_j)
+    s_i = [np.sum([group[i] for group in args]) for i in range(n)]
 
     # Variances
-    ss_t = sp.sum([v**2 for v in group for group in args]) - x_t**2/float(k*n)
-    ss_bg = sp.sum([x_j[j]**2/float(n) for j in range(k)]) - x_t**2/float(k*n)
-    ss_bs = sp.sum([s_i[i]**2/float(k) for i in range(n)]) - x_t**2/float(k*n)
+    ss_t = np.sum([v**2 for group in args for v in group]) - x_t**2/float(k*n)
+    ss_bg = np.sum([x_j[j]**2/float(n) for j in range(k)]) - x_t**2/float(k*n)
+    ss_bs = np.sum([s_i[i]**2/float(k) for i in range(n)]) - x_t**2/float(k*n)
     ss_wg = ss_t - ss_bg
     ss_res = ss_t - ss_bg - ss_bs
 
@@ -109,7 +110,7 @@ def anova_within_test(*args):
     p_value = 1 - st.f.cdf(F, df_bg, df_res)
     
     # Pivots
-    pivots = [sp.mean(group)/sp.sqrt(2*(ss_wg/df_wg)/float(n)) for group in args]
+    pivots = [np.mean(group)/np.sqrt(2*(ss_wg/df_wg)/float(n)) for group in args]
 
     return F, p_value, pivots
 
@@ -140,8 +141,8 @@ def bonferroni_test(pivots, n):
         D.J. Sheskin, Handbook of parametric and nonparametric statistical procedures. crc Press, 2003, Test 21b: The Bonferroni-Dunn test
     """
     k = len(pivots)
-    values = pivots.values()
-    keys = pivots.keys()
+    values = list(pivots.values())
+    keys = list(pivots.keys())
 
     m = (k*(k-1))/2.
 

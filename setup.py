@@ -11,4 +11,8 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     packages=setuptools.find_packages(exclude=["api", "docker", "web"]),
     python_requires='>=3.6',
+    install_requires=[
+            "numpy >= 1.20",
+            "scipy",
+    ],
 )

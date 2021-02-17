@@ -75,7 +75,7 @@ class TestAnova(unittest.TestCase):
     def test_bonferroni(self):
         _,_,pivots = pt.anova_test(*test_data.values())
         pivots = {key: pivots[i] for i,key in enumerate(test_data.keys())}
-        pt.bonferroni_test(pivots, len(test_data.values()[0]))
+        pt.bonferroni_test(pivots, len(list(test_data.values())[0]))
 
 if __name__ == '__main__':
     unittest.main()
